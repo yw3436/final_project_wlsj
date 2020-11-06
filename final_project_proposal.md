@@ -1,22 +1,17 @@
----
-title: "Final Porject Proposal"
-author: Yuqi Wang; Rongqing Jia; Xiaoyu Li; Yan Song
-output: github_document
----
+Final Porject Proposal
+================
+Yuqi Wang; Rongqing Jia; Xiaoyu Li; Yan Song
 
 **The group members**
 
 We have four people in our group:
 
-* Yuqi Wang (yw3436)
-* Rongqing Jia (rj2579)
-* Xiaoyu Li (xl2834)
-* Yan Song (ys3295)
+  - Yuqi Wang (yw3436)
+  - Rongqing Jia (rj2579)
+  - Xiaoyu Li (xl2834)
+  - Yan Song (ys3295)
 
 **The tentative project title**
-
-
-
 
 **The motivation for this project**
 
@@ -27,7 +22,3 @@ We have four people in our group:
 **The planned analyses / visualizations / coding challenges**
 
 **The planned timeline**
-
-
-
-
