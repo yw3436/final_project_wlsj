@@ -13,6 +13,9 @@ We have four people in our group:
 
 **The tentative project title**
 
+Trend of HIV diagnosis in NYC and the distribution of condom
+availability program locations
+
 **The motivation for this project**
 
 **The intended final products**
