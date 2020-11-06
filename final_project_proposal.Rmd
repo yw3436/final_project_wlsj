@@ -26,7 +26,7 @@ output: github_document
 
 **The planned timeline**
 
-* November 10-13: Zoom meeting --> December 5: project report, webpage and screencast (video), peer assessment --> December 10: in class presentation 
+* November 10-13: Zoom meeting --> December 5: project report, webpage and screencast (video), peer assessment --> December 10: in class presentation
 
 
 
