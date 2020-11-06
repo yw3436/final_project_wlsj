@@ -1,0 +1,253 @@
+---
+title: "Final Porject"
+author: Yuqi Wang
+output: github_document
+---
+
+This is my answer for HW3.
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+library(patchwork)
+library(hexbin)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Problem 1
+
+First, load the data set.
+```{r}
+data("instacart")
+```
+
+This dataset contains `r nrow(instacart)` rows and `r ncol(instacart)` columns.
+
+Observations are the level of items in orders by users. there are user/order variables, including user ID, order ID, order day, and order hour. There are also item variables, including name, aisles, department, and some numeric codes. 
+
+How many aisles and which are most items from?
+
+```{r}
+count_aisle = instacart %>% 
+  count(aisle) %>% 
+  arrange(desc(n))
+```
+
+There are `r nrow(count_aisle)` aisles and fresh vegetables are most items from.
+
+Make a plot
+
+```{r}
+count_aisle %>% 
+  filter(n > 10000) %>% 
+  mutate(
+    aisle = factor(aisle),
+    aisle = fct_reorder(aisle, n)
+    # this function is used to reorder aisle according to n; factor() is close to as.factor(), check with ?help.
+  ) %>% 
+  ggplot(aes(x = aisle, y = n)) + 
+  geom_point() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1))
+```
+
+Making a table showing the most popular items
+
+```{r}
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle) %>% 
+  count(product_name) %>% 
+  mutate(rank = min_rank(desc(n))) %>% 
+  #always use max_rank
+  filter(rank < 4) %>% 
+  arrange(aisle, desc(n)) %>% 
+  knitr::kable()
+```
+
+Apple vs ice cream.
+
+```{r}
+instacart %>% 
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
+  group_by(product_name, order_dow) %>% 
+  summarize(mean_hour = mean(order_hour_of_day)) %>% 
+  pivot_wider(
+    names_from = order_dow,
+    values_from = mean_hour
+  )
+```
+
+
+## Problem 2
+
+First, load, tidy and wrangle the accelerometer data.
+
+```{r}
+accel_df = read.csv('./data/accel_data.csv') %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    activity_1:activity_1440,
+    names_to = "minute",
+    names_prefix = "activity.",
+    values_to = "activity"
+  ) %>% 
+  mutate(
+    day = factor(day),
+    day = forcats::fct_relevel(day, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+  )) %>% 
+  mutate(day_cat = case_when(
+      day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "weekday",
+      day %in% c("Saturday", "Sunday") ~ "weekend",
+      TRUE ~ ""),
+    minute = as.numeric(minute)) %>% 
+  relocate(day_id, week, day, day_cat)
+```
+
+Description of the data set:
+
+This data set contains `r nrow(accel_df)` rows and `r ncol(accel_df)` columns. It includes the following variables: `r ls(accel_df)`, to describe the activity counts for `r nrow(accel_df)` observations.
+
+Next, we create a total activity variable for each day, and create a table to show the totals.
+
+```{r}
+accel_total_day = accel_df %>% 
+  group_by(week, day) %>% 
+  summarise(total_act_day = sum(activity)) %>% 
+  arrange(week, day) %>% 
+  pivot_wider(
+    names_from = day,
+    values_from = total_act_day
+  ) %>% 
+  knitr::kable(digit = 1)
+
+accel_total_day
+```
+
+From the table we built for the totals, we found that generally speaking, this participant tended to have more activity on Fridays. Also, on Saturdays, there are two days with summed activity counts of 1440, which are suspicious numbers because 1440 means the person has an activity count of 1 for every minute on the two days, indicating that this person might have taken off the device on the two days.
+
+```{r}
+accel_df %>% 
+  mutate(
+    hour = ceiling(minute/60)
+  ) %>% 
+  group_by(day_id, hour) %>% 
+  mutate(mean_act = mean(activity)) %>% 
+  ggplot(aes(x = hour, y = mean_act, color = day, group = day_id)) +
+  geom_line() +
+  labs(
+    title = "Activity plot",
+    x = "24 hours",
+    y = "Mean activity counts per hour",
+    caption = "Data from the accelerometer data"
+  )
+```
+
+Description of the trend:
+According to the graph, the participant tends to have more activity from 5am to 1pm and from 6pm to 9pm. On Fridays, the person tend to have more activities in the evening, while on Sundays, the person has more activity at daytime. the highest average activity count is on Monday.
+
+## Problem 3
+
+First, load the ny_noaa data set and do data cleaning about it.
+```{r}
+data("ny_noaa")
+noaa_df = ny_noaa %>% 
+  separate(date, c("year", "month", "day"), "-") %>% 
+  mutate(year = as.integer(year),
+         month = as.integer(month),
+         day = as.integer(day)) %>%
+  mutate(tmax = as.numeric(tmax),
+         tmin = as.numeric(tmin),
+         month = month.name[month]) %>% 
+  mutate(tmax = tmax/10,
+         tmin = tmin/10,
+         prcp = prcp/10)
+```
+
+Description of the dataset:
+
+This data set contains `r nrow(noaa_df)` rows and `r ncol(noaa_df)` columns. It includes the following variables: `r ls(noaa_df)`, to describe the information of weather from `r min(noaa_df$year)` to `r max(noaa_df$year)`. There are many missing values for `tmax` and `tmin`, but the data analysis is not affected.
+
+
+Next, check what are the most commonly observed values for snowfall.
+```{r}
+noaa_df %>% 
+  count(snow, name = "snow_num") %>% 
+  mutate(rank = min_rank(desc(snow_num))) %>% 
+  arrange(rank)
+```
+
+For snowfall, 0 is the most commonly observed value, because for most days in a year, there is no snowfall.
+
+Make a two-panel plot showing the average max temperature in January and in July in each station across years
+
+```{r}
+noaa_df %>% 
+  filter(month == c("January", "July")) %>% 
+  group_by(id, month, year) %>% 
+  summarize(tmax_mean = mean(tmax, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = tmax_mean, group = id)) +
+  geom_line(alpha = 0.3) +
+  facet_grid(month ~ .) +
+  labs(
+    title = "Temperature plot",
+    x = "Year",
+    y = "Mean Maxiumum daily temperature (C)",
+    caption = "Data from the noaa package"
+ )
+```
+
+Description of trend:
+
+According to the graph, the mean max temperatures for January and July show a fluctuant trend from 1980 to 2010. The max temperature in Januarys shows a slight increasing trend, which may indicate global warming, while the max temperature in Julys are relatively stable. The difference of max temperature measures among all the stations is about 10 degree Celsius.
+
+There are several outliers in the two graphs. In the graph of January, there is a extremely high outlier with max temperature of 13 degress Celsius. In July, there are two outliers with low temperature of 14 and 17.
+
+
+Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+
+```{r, fig.height = 6, fig.width = 12}
+tmax_min_p = noaa_df %>% 
+  na.omit(tmax,tmin) %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_hex() +
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maximum daily temperature (C)",
+    caption = "Data from the noaa package"
+ )
+
+snowfall_df = noaa_df %>% 
+  filter(0 < snow, snow < 100) %>% 
+  group_by(year) %>% 
+  select(year, snow) %>% 
+  mutate(year = as.character(year)) %>% 
+  ggplot(aes(x = year, y = snow)) +
+  geom_boxplot() +  
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1)) +
+  labs(
+    title = "Snowfall distribution plot",
+    x = "Year",
+    y = "Snow fall",
+    caption = "Data from the noaa package"
+ )
+
+tmax_min_p + snowfall_df
+```
+
+
