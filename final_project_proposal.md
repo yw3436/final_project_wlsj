@@ -24,6 +24,10 @@ need of condoms in boroughs with high HIV incidences.
 
 **The intended final products**
 
+  - We intend to create a webpage containing an overview of the project
+    scope, data, approaches, visualizations, and full report. We plan to
+    contain a dashboard in our webpage.
+
 **The anticipated data sources**
 
 **The planned analyses / visualizations / coding challenges**
