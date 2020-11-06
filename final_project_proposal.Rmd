@@ -20,6 +20,8 @@ Trend of HIV diagnosis in NYC and the distribution of condom availability progra
 
 **The motivation for this project**
 
+We are curious about the trend of HIV diagnosis in NYC from 2010 to 2017, and whether the condom availability program in 2018 satisfy the need of condoms in boroughs with high HIV incidences.
+
 **The intended final products**
 
 **The anticipated data sources**
